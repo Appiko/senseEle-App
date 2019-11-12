@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "413201651303",
+    "firebase_url": "https://sense-ele.firebaseio.com",
+    "project_id": "sense-ele",
+    "storage_bucket": "sense-ele.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:413201651303:android:77e2a4a029a9dec4ef26c2",
+        "android_client_info": {
+          "package_name": "org.appiko.ele_deploy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "413201651303-2bpck6vghi4kkatvli4fh1pstb6gu2lf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBiJIhOGYOiscnqURmPZsh8WNVzGHPgGLI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "413201651303-2bpck6vghi4kkatvli4fh1pstb6gu2lf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
