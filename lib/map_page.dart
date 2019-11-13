@@ -99,13 +99,15 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         bounds.extend(latLng);
         return Point(latLng, p['alive'], p['number']);
       }).toList();
-      mapController.fitBounds(
-        bounds,
-        options: FitBoundsOptions(
-          padding: EdgeInsets.only(left: 15.0, right: 15.0),
-        ),
-      );
-      // _animatedMapMove(q[0].loc, 16);
+      if (q.length > 0) {
+        mapController.fitBounds(
+          bounds,
+          options: FitBoundsOptions(
+            padding: EdgeInsets.only(left: 15.0, right: 15.0),
+          ),
+        );
+        _animatedMapMove(q[0].loc, 16);
+      }
     });
   }
 
@@ -115,9 +117,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     return new FlutterMap(
       mapController: mapController,
       options: MapOptions(
-        center: LatLng(13.0625009, 77.4749369),
-        zoom: 17,
+        zoom: 16,
+        center: LatLng(12, 77),
         maxZoom: 19.4,
+        minZoom: 10,
       ),
       layers: [
         TileLayerOptions(

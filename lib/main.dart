@@ -3,6 +3,8 @@ import 'package:ele_deploy/chart_page.dart';
 import 'package:ele_deploy/deploy_page.dart';
 import 'package:ele_deploy/locators.dart';
 import 'package:ele_deploy/map_page.dart';
+import 'package:ele_deploy/scan_page.dart';
+import 'package:ele_deploy/services/bluetooth/bluetooth_connection.dart';
 import 'package:ele_deploy/services/bluetooth/bluetooth_scan.dart';
 import 'package:ele_deploy/services/connectivity_service.dart';
 import 'package:ele_deploy/services/fcm_service.dart';
@@ -25,6 +27,9 @@ Future main() async {
       providers: <SingleChildCloneableWidget>[
         ChangeNotifierProvider.value(value: locator<LocationService>()),
         ChangeNotifierProvider.value(value: locator<BluetoothScanService>()),
+        ChangeNotifierProvider.value(
+          value: locator<BluetoothConnectionService>(),
+        )
       ],
       child: MyApp(),
     ),
@@ -40,6 +45,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(),
       routes: {
         '/': (_) => HomePage(),
+        '/scan': (_) => ScanPage(),
         '/deploy': (_) => DeployPage(),
         '/chart': (_) => ChartPage(),
       },
@@ -104,7 +110,7 @@ class _HomePageState extends State<HomePage> {
               child: Text("Deploy"),
               onPressed: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/deploy');
+                Navigator.pushNamed(context, '/scan');
               },
             ),
             FlatButton(

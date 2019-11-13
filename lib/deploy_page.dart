@@ -3,12 +3,18 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:ele_deploy/locators.dart';
+import 'package:ele_deploy/models/device_info.dart';
+import 'package:ele_deploy/services/bluetooth/bluetooth_connection.dart';
+import 'package:ele_deploy/services/bluetooth/bluetooth_scan.dart';
+import 'package:ele_deploy/services/bluetooth/blutetooth_io.dart';
 import 'package:ele_deploy/services/hasura_service.dart';
 import 'package:ele_deploy/services/location/location_service.dart';
 import 'package:ele_deploy/services/offline_storage_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blue/flutter_blue.dart';
 import 'package:hasura_connect/hasura_connect.dart';
 import 'package:location/location.dart';
+import 'package:provider/provider.dart';
 
 class DeployPage extends StatefulWidget {
   @override
@@ -32,7 +38,7 @@ class _DeployPageState extends State<DeployPage> {
     return String.fromCharCodes(codeUnits).toUpperCase();
   }
 
-  updateNode(String macAddress) async {
+  updateNode(DeviceInfo deviceInfo) async {
     setState(() {
       isDeploying = true;
     });
@@ -50,9 +56,22 @@ class _DeployPageState extends State<DeployPage> {
       });
       return;
     }
+
+    // TODO: Should deployed on be updated?
     String query = """
         mutation {
-         insert_node(objects: {deployment: "3cb9fa15-17b1-4141-82d2-1cfd40e48ff8", id: "$macAddress", location: "(${locationData.latitude},${locationData.longitude})", number: 10, accuracy: "${locationData.accuracy}", deployed_on: "${DateTime.now()}"}) {
+         insert_node(objects: {
+           deployment: "3cb9fa15-17b1-4141-82d2-1cfd40e48ff8",
+           id: "${deviceInfo.macAddress}",
+           location: "(${locationData.latitude},${locationData.longitude})",
+           number: ${deviceInfo.number},
+           accuracy: "${locationData.accuracy}",
+           }
+          on_conflict: {
+            constraint: node_pkey,
+            
+            update_columns: [number, location, accuracy, deployment,deployed_on]
+          }) {
            returning {
               id
              location
@@ -64,7 +83,7 @@ class _DeployPageState extends State<DeployPage> {
     try {
       final result = await InternetAddress.lookup('google.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        print(locator<HasuraService>().mutate(query));
+        print(await locator<HasuraService>().mutate(query));
       }
     } on SocketException {
       print('Not connected; Writing to file');
@@ -72,7 +91,7 @@ class _DeployPageState extends State<DeployPage> {
     } on Exception {
       print("WRONG!");
     }
-
+    closeConnection();
     Navigator.pop(context);
   }
 
@@ -96,47 +115,92 @@ class _DeployPageState extends State<DeployPage> {
         rand.nextInt(9).toString();
   }
 
+  Future<DeviceInfo> getMacAddress() async {
+    return locator<BluetoothIOService>().readDeviceInfo();
+  }
+
+  DeviceInfo deviceInfo;
+
+  closeConnection() async {
+    await locator<BluetoothConnectionService>().disconnect();
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     print("rebuilding");
-    String macAddress = getFakeMacAddress();
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            RaisedButton(
-              onPressed: () {
-                setState(() {});
-              },
-              child: Text("REFRESH"),
+
+    if (Provider.of<BluetoothConnectionService>(context).deviceState ==
+            BluetoothDeviceState.disconnected ||
+        !Provider.of<BluetoothScanService>(context).isBluetoothOn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.popUntil(context, ModalRoute.withName('/scan'));
+      });
+      return Scaffold();
+    }
+
+    return WillPopScope(
+      onWillPop: () => closeConnection(),
+      child: Scaffold(
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                FutureBuilder(
+                  future: getMacAddress(),
+                  builder: (_, AsyncSnapshot<DeviceInfo> snapshot) {
+                    if (snapshot.hasData) {
+                      deviceInfo = snapshot.data;
+                      return Column(
+                        children: <Widget>[
+                          Text("MAC address: ${snapshot.data.macAddress}\n"),
+                          Text("Number: ${snapshot.data.number}\n"),
+                        ],
+                      );
+                    } else if (snapshot.hasError) {
+                      return Text("Error!");
+                    } else {
+                      return CircularProgressIndicator();
+                    }
+                  },
+                ),
+
+                isDeploying
+                    ? CircularProgressIndicator(strokeWidth: 5)
+                    : RaisedButton(
+                        color: Colors.lightBlueAccent,
+                        padding:
+                            EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                        onPressed: () => updateNode(deviceInfo),
+                        child: Text(
+                          "DEPLOY",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12.5,
+                          ),
+                        ),
+                      ),
+
+                // SliderButton(
+                //     action: () {
+                //       updateNode(macAddress);
+                //     },
+                //     // shimmer: false,
+                //     backgroundColor: Colors.redAccent,
+
+                //     label: Text("DEPLOY NOW"),
+                //     icon: Icon(
+                //       Icons.device_hub,
+                //       size: 44,
+                //     ),
+                //   ),
+              ],
             ),
-            Text("MAC ADDRESS: $macAddress"),
-            isDeploying
-                ? CircularProgressIndicator(
-                    strokeWidth: 5,
-                  )
-                : RaisedButton(
-                    onPressed: () => updateNode(macAddress),
-                    child: Text("deploy"),
-                  ),
-
-            // SliderButton(
-            //     action: () {
-            //       updateNode(macAddress);
-            //     },
-            //     // shimmer: false,
-            //     backgroundColor: Colors.redAccent,
-
-            //     label: Text("DEPLOY NOW"),
-            //     icon: Icon(
-            //       Icons.device_hub,
-            //       size: 44,
-            //     ),
-            //   ),
-          ],
+          ),
         ),
       ),
     );

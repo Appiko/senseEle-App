@@ -19,9 +19,9 @@ class HasuraService {
     });
   }
 
-  mutate(String query) {
+  mutate(String query) async {
     try {
-      _hasuraConnect.mutation(query);
+      return await _hasuraConnect.mutation(query);
     } catch (e) {
       print(e);
     }

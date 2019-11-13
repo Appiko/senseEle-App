@@ -19,27 +19,24 @@ class _ScanPageState extends State<ScanPage> {
     bool _isBluetoothOn =
         Provider.of<BluetoothScanService>(context).isBluetoothOn;
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Devices"),
+      ),
       body: Column(
         children: <Widget>[
           _isBluetoothOn
               ? _isScanning ? LinearProgressIndicator() : Container(height: 2.0)
               : Container(height: 2.0),
-          RaisedButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/deploy');
-            },
-            child: Text("Go to deploy"),
-          ),
           _isBluetoothOn
               ? Expanded(
                   flex: 1,
                   child: ListView.separated(
                     shrinkWrap: true,
                     separatorBuilder: (_, __) => Padding(
-                      padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+                      padding: const EdgeInsets.only(left: 20.0, right: 20.0),
                       child: Container(
                         height: 1,
-                        color: Colors.grey,
+                        color: Colors.black26,
                       ),
                     ),
                     itemCount: _scanResults.length,
@@ -67,11 +64,12 @@ class _ScanPageState extends State<ScanPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      // Icon(
-                      //   Icons.bluetooth_disabled,
-                      //   size: 200,
-                      //   color: Colors.grey,
-                      // ),
+                      Icon(
+                        Icons.bluetooth_disabled,
+                        size: 200,
+                        color: Colors.grey,
+                      ),
+                      SizedBox(height: 30),
                       FloatingActionButton.extended(
                         icon: Icon(Icons.bluetooth_searching),
                         label: Text("TURN ON BLUETOOTH"),

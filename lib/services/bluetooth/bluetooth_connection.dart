@@ -21,8 +21,8 @@ class BluetoothConnectionService with ChangeNotifier {
     });
   }
 
-  disconnect() {
-    device.disconnect();
+  disconnect() async {
+    await device.disconnect();
     device = null;
     deviceState = null;
     notifyListeners();
