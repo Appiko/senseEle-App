@@ -9,9 +9,7 @@ class FCMService {
   }
 
   x() async {
-    FirebaseApp f = FirebaseApp.instance;
-    print(f.name);
-    _firebaseMessaging.getToken().then(print);
+    _firebaseMessaging.subscribeToTopic("all");
 
     _firebaseMessaging.setAutoInitEnabled(true);
     _firebaseMessaging.configure(
