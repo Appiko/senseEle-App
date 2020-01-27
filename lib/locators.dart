@@ -6,7 +6,7 @@ import 'package:ele_deploy/services/fcm_service.dart';
 import 'package:ele_deploy/services/hasura_service.dart';
 import 'package:ele_deploy/services/location/location_service.dart';
 import 'package:ele_deploy/services/offline_storage_service.dart';
-import 'package:ele_deploy/services/secretService.dart';
+import 'package:ele_deploy/services/secret_service.dart';
 import 'package:ele_deploy/services/shared_prefs.dart';
 import 'package:get_it/get_it.dart';
 

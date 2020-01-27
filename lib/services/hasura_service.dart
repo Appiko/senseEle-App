@@ -1,5 +1,5 @@
 import 'package:ele_deploy/locators.dart';
-import 'package:ele_deploy/services/secretService.dart';
+import 'package:ele_deploy/services/secret_service.dart';
 import 'package:hasura_connect/hasura_connect.dart';
 
 class HasuraService {
